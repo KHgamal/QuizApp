@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'pages/home_page.dart';
 
 void main() {
-  runApp(const QuizApp());
+  runApp(const QuizApp()
+  );
 }
 
 class QuizApp extends StatelessWidget {

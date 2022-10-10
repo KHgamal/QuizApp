@@ -10,7 +10,7 @@ final Color  backgroundColor;
   Widget build(BuildContext context) {
     return SizedBox(
       width: 150,
-      height: 20,
+      height: 30,
       child: ListView.builder(
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,

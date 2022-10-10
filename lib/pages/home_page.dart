@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/Widgets/button.dart';
+import 'package:quiz_app/Widgets/answers.dart';
+import 'package:quiz_app/Widgets/result.dart';
+
 import 'package:quiz_app/model.dart';
 
+import '../Widgets/background.dart';
+import '../Widgets/button.dart';
+import '../Widgets/circular_avatar.dart';
 import '../constants/constants.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -10,118 +15,78 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-
+//add score to right and false answers
+List score = [];
+//index of List<Quizzes>
+int index = 0;
+//color of selected answer
+Color color=Colors.white;
+//to distinguish selected button
+int  selectedIndex=0;
+//check if question is answered ( a button is tapped )
+bool answered=false;
 class _MyHomePageState extends State<MyHomePage> {
-  int score = 0;
-  int index = 0;
-  List<Quizzes> list = [
-    Quizzes(question: "what is the capital of India ", answers: [
-      {'text': "mumbai", 'isTrue': true},
-      {'text': "sydney", 'isTrue': false},
-      {'text': "bali", 'isTrue': false}
-    ]),
-    Quizzes(question: "what is the capital of Australia ", answers: [
-      {'text': "mumbai", 'isTrue': false},
-      {'text': "sydney", 'isTrue': true},
-      {'text': "bali", 'isTrue': false}
-    ]),
-    Quizzes(question: "what is the capital of Indonesia ", answers: [
-      {'text': "mumbai", 'isTrue': false},
-      {'text': "sydney", 'isTrue': false},
-      {'text': "bali", 'isTrue': true}
-    ]),
-  ];
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-            child: Stack(
+      appBar: AppBar(
+        backgroundColor: customColor,
+        leading: IconButton(
+          icon:index==0?const SizedBox() :const Icon(Icons.arrow_back),onPressed:returnBack ,),
+          title: Center(
+            child: CircularAvatar( index: index, list: list, foregroundColor: whiteColor,
+                  backgroundColor: endColor,),
+          ),
+
+        centerTitle: true,
+      ),
+      body: Stack(
           children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  end: Alignment.topLeft,
-                  begin: Alignment.bottomRight,
-                  colors: [
-                    endColor,
-                    beginColor,
-                  ],
+            const GradientContainer(endColor: endColor,beginColor: beginColor,),
+      Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.only(
+                  left: 15,
+                  right: 15,
+                  top: 20,
+                  bottom: 20,
                 ),
+                width: 500,
+                height: 500,
+                decoration: BoxDecoration(
+                  color: whiteColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: index != list.length
+                    ? Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 30),
+                            child: Text("${list[index].question} ?",
+                                style: textStyle),
+                          ),
+                          Answers(index: index, list: list, onTap: answered?(){}:checkAnswer,
+                            answered: answered, selectedIndex: selectedIndex, color: color,
+                          ),
+                          const SizedBox(height: 20,),
+                          CustomButton(onTap: next,color: endColor),
+                        ],
+                      )
+                    : Result(quizList: list, color: customColor,),
               ),
             ),
-            Column(
-              children: [
-                const SizedBox(
-                  height: 20,
-                ),
-                Expanded(
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: list.length,
-                      itemBuilder: (context, item) => Center(
-                            child: CircleAvatar(
-                                radius: 25,
-                                foregroundColor: whiteColor,
-                                backgroundColor: customColor,
-                                child: item >= index
-                                    ? Text("${item + 1}")
-                                    : const Icon(Icons.done)),
-                          )),
-                ),
-                Expanded(
-                    flex: 20,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.only(
-                          left: 15,
-                          right: 15,
-                          top: 20,
-                          bottom: 20,
-                        ),
-                        width: 500,
-                        height: 500,
-                        decoration: BoxDecoration(
-                          color: whiteColor,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: index != list.length
-                            ? Column(
-                                children: [
-                                  const SizedBox(
-                                    height: 20,
-                                  ),
-                                  Text("${list[index].question} ?",
-                                      style: textStyle),
-                                  const SizedBox(
-                                    height: 30,
-                                  ),
-                                  ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    shrinkWrap: true,
-                                    itemCount: list[index].answers.length,
-                                    itemBuilder: (context, i) =>
-                                        CustomButton(onTap:()=>checkAnswer(i),
-                                            label: Text("${list[index].answers[i]["text"]}"),)
-                                  )
-                                ],
-                              )
-                            : Center(
-                                child: Text(
-                                  "your score is $score ",
-                                  style:textStyle ,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-              
-              ],
-            ),
+          ),
+
+        ],
+      ),
           ],
-        )),
+        ),
 
     );
 
@@ -129,13 +94,42 @@ class _MyHomePageState extends State<MyHomePage> {
   void checkAnswer(int i){
     setState(
           ()  {
-        if (list[index].answers[i]
-        ["isTrue"] ==
-            true) {
-          score += 10;
+            answered=true;
+            selectedIndex=i;
+        if (list[index].answersDetails[i].isTrue == true) {
+          score.add(1);
+          color=Colors.green;
         }
-        index++;
+        else{
+          score.add(0);
+          color=Colors.red;
+        }
       },
     );
+  }
+ void returnBack(){
+    setState(
+          ()  {
+            if(answered==true) {
+         score.removeLast();
+            }
+            answered=false;
+            score.removeLast();
+        index--;
+      },
+    );
+  }
+  void next(){
+    setState(() {
+      if(answered) {
+        answered = false;
+        index++;
+      }
+      else{
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: const Text("select an answer to continue"),backgroundColor: customColor,),
+        );
+      }
+    });
   }
 }
